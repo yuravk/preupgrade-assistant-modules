@@ -5,12 +5,13 @@
 
 Name:           preupgrade-assistant-el6toel7
 Version:        0.8.0
-Release:        1%{?dist}
-Summary:        Set of modules created for upgrade to Red Hat Enterprise Linux 7
+Release:        2%{?dist}
+Summary:        Set of modules created for upgrade to CentOS release 7
 Group:          System Environment/Libraries
 License:        GPLv3+
 URL:            https://github.com/upgrades-migrations/preupgrade-assistant-modules
 Source0:        %{name}-%{version}.tar.gz
+Patch1:         %{name}-%{version}-centos.patch
 BuildArch:      noarch
 BuildRoot:      %{_tmppath}/%{pkg_name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -39,6 +40,7 @@ Requires:       python
 Requires:       coreutils
 Requires:       perl
 
+
 #do not require php even in presence of php scripts
 #dependency filtering: https://fedoraproject.org/wiki/Packaging:AutoProvidesAndRequiresFiltering
 %if 0%{?fedora} || 0%{?rhel} > 6
@@ -62,16 +64,18 @@ Requires:       perl
 
 %description
 The package provides a set of modules used for assessment
-of the source system for upgrade or migration to Red Hat
-Enterprise Linux 7 system.
+of the source system for upgrade or migration to CentOS release 7 system.
 The modules are used by the preupgrade-assistant package.
 
 
 %prep
 %setup -q -n %{name}-%{version}
-
+%patch1 -p1
 
 %build
+# Executable flag as patch can't set mode of new file(s)
+chmod +x RHEL6_7/packages/NonCentOSSignedPkg/check
+
 # This is all we need here. The RHEL6_7-results dir will be created
 # with XCCDF files for Preupgrade Assistant and OpenSCAP
 preupg-xccdf-compose RHEL6_7
@@ -107,7 +111,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Thu Aug 10 2017 Petr Stodulka <pstodulk@redhat.com> - %{version}-%{release}
+* Fri Apr 5 2024 Yuriy Kohut <ykohut@almalinux.org> - 0.8.0-2
+- Add CentOS branding with patch: preupgrade-assistant-el6toel7-0.8.0-centos.patch
+
+* Thu Aug 10 2017 Petr Stodulka <pstodulk@redhat.com> - 0.8.0-1
 - Initial spec file created for modules of Preupgrade Assistant for
   upgrade&migration from RHEL 6.x system to RHEL 7.x system
 
